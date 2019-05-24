@@ -38,10 +38,11 @@ values."
      ;; ----------------------------------------------------------------
      org
      pandoc
+     latex
      emacs-lisp
      helm
      auto-completion
-     ;; semantic
+     semantic
      syntax-checking
      better-defaults
      markdown
@@ -55,7 +56,6 @@ values."
      octave
      scheme
      ;; asm
-     ;; latex
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -63,7 +63,6 @@ values."
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '(
                                       drag-stuff
-                                      neotree
                                       multiple-cursors
                                       )
    ;; A list of packages that cannot be updated.
@@ -130,8 +129,8 @@ values."
    ;; `spacemacs-buffer-startup-lists-length' takes effect.
    dotspacemacs-startup-lists '(
                                 (projects . 5)
-																(recents . 7)
-																)
+                                (recents . 7)
+                                )
    ;; True if the home buffer should respond to resize events.
    dotspacemacs-startup-buffer-responsive t
    ;; Default major mode of the scratch buffer (default `text-mode')
@@ -329,7 +328,7 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
   ;; Fira Code Configuration
-	;; https://github.com/tonsky/FiraCode/wiki/Emacs-instructions#using-prettify-symbols
+  ;; https://github.com/tonsky/FiraCode/wiki/Emacs-instructions#using-prettify-symbols
   (defun fira-code-mode--make-alist (list)
     "Generate prettify-symbols alist from LIST."
     (let ((idx -1))
@@ -389,6 +388,7 @@ you should place your code here."
 
   (provide 'fira-code-mode)
 
+
   ;; Linux Kernel Style
   ;; https://www.kernel.org/doc/html/v4.10/process/coding-style.html#indentation
   (defun c-lineup-arglist-tabs-only (ignored)
@@ -410,13 +410,213 @@ you should place your code here."
                    c-lineup-gcc-asm-reg
                    c-lineup-arglist-tabs-only))))))
 
+
+  ;; Recherche Reproductible MOOC, emacs version
+  ;; https://www.fun-mooc.fr/courses/course-v1:inria+41016+session02/info
+  ;; recommended configuration
+  ;; https://learninglab.gitlabpages.inria.fr/mooc-rr/mooc-rr-ressources/module2/ressources/rr_org_archive.tgz
+  (dolist (pkg '(
+                 auctex
+                 htmlize
+                 ))
+    (when (not (package-installed-p pkg))
+      (package-install pkg)))
+
+  (require 'org)
+
+  (setq frame-title-format
+        '("Emacs - " (buffer-file-name "%f"
+                                       (dired-directory dired-directory "%b"))))
+
+  (global-font-lock-mode t)
+
+  (line-number-mode 1)
+  (column-number-mode 1)
+
+  (load-library "paren")
+  (show-paren-mode 1)
+  (transient-mark-mode t)
+  (require 'paren)
+
+  (defalias 'yes-or-no-p 'y-or-n-p)
+
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+  (prefer-coding-system 'utf-8)
+
+  (setq
+   ns-command-modifier 'meta         ; Apple/Command key is Meta
+   ns-alternate-modifier nil         ; Option is the Mac Option key
+   ns-use-mac-modifier-symbols  nil  ; display standard Emacs (and not standard Mac) modifier symbols
+   )
+
+  (cua-mode t) ;; some Common User Access keys (not really though)
+
+  (global-set-key [f5] '(lambda () (interactive) (revert-buffer nil t nil)))
+
+  (global-set-key (kbd "C-x g") 'magit-status)
+  (global-set-key (kbd "C-x M-g") 'magit-dispatch-popup)
+  ;; (global-magit-file-mode 1)
+
+  (defun auto-fill-mode-on () (TeX-PDF-mode 1))
+  (add-hook 'tex-mode-hook 'TeX-PDF-mode-on)
+  (add-hook 'latex-mode-hook 'TeX-PDF-mode-on)
+  (setq TeX-PDF-mode t)
+
+  (defun auto-fill-mode-on () (auto-fill-mode 1))
+  (add-hook 'text-mode-hook 'auto-fill-mode-on)
+  (add-hook 'emacs-lisp-mode 'auto-fill-mode-on)
+  (add-hook 'tex-mode-hook 'auto-fill-mode-on)
+  (add-hook 'latex-mode-hook 'auto-fill-mode-on)
+
+  (setq org-directory "~/org/")
+
+  (setq org-hide-leading-stars t)
+  (setq org-alphabetical-lists t)
+  (setq org-src-fontify-natively t)  ;; you want this to activate coloring in blocks
+  (setq org-src-tab-acts-natively t) ;; you want this to have completion in blocks
+  (setq org-hide-emphasis-markers t) ;; to hide the *,=, or / markers
+  (setq org-pretty-entities t)       ;; to have \alpha, \to and others display as utf8 http://orgmode.org/manual/Special-symbols.html
+
+  (global-set-key "\C-cl" 'org-store-link)
+  (global-set-key "\C-cc" 'org-capture)
+  (global-set-key (kbd "C-c a") 'org-agenda)
+  (define-key global-map "\C-cl" 'org-store-link)
+  (define-key global-map (kbd "C-c a") 'org-agenda)
+  (global-set-key "\C-cb" 'org-iswitchb)
+  (setq org-default-notes-file "~/org/notes.org")
+  (define-key global-map "\C-cd" 'org-capture)
+  (setq org-capture-templates (quote (("t" "Todo" entry (file+headline "~/org/liste.org" "Tasks") "* TODO %?
+  %i
+  %a" :prepend t) ("j" "Journal" entry (file+datetree "~/org/journal.org") "* %?
+Entered on %U
+  %i
+  %a"))))
+
+  (setq org-agenda-include-all-todo t)
+  (setq org-agenda-include-diary t)
+
+  (global-set-key (kbd "C-c d") 'insert-date)
+  (defun insert-date (prefix)
+    "Insert the current date. With prefix-argument, use ISO format. With
+   two prefix arguments, write out the day and month name."
+    (interactive "P")
+    (let ((format (cond
+                   ((not prefix) "** %Y-%m-%d")
+                   ((equal prefix '(4)) "[%Y-%m-%d]"))))
+      (insert (format-time-string format))))
+
+  (global-set-key (kbd "C-c t") 'insert-time-date)
+  (defun insert-time-date (prefix)
+    "Insert the current date. With prefix-argument, use ISO format. With
+   two prefix arguments, write out the day and month name."
+    (interactive "P")
+    (let ((format (cond
+                   ((not prefix) "[%H:%M:%S; %d.%m.%Y]")
+                   ((equal prefix '(4)) "[%H:%M:%S; %Y-%m-%d]"))))
+      (insert (format-time-string format))))
+
+  (global-set-key (kbd "C-c l") 'org-store-link)
+
+  (global-set-key (kbd "C-c <up>") 'outline-up-heading)
+  (global-set-key (kbd "C-c <left>") 'outline-previous-visible-heading)
+  (global-set-key (kbd "C-c <right>") 'outline-next-visible-heading)
+
+  ;; In org-mode 9 you need to have #+PROPERTY: header-args :eval never-export
+  ;; in the beginning or your document to tell org-mode not to evaluate every
+  ;; code block every time you export.
+  (setq org-confirm-babel-evaluate nil) ;; Do not ask for confirmation all the time!!
+
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '(
+     (shell . t)
+     (python . t)
+     (R . t)
+     (ruby . t)
+     (ocaml . t)
+     (ditaa . t)
+     (dot . t)
+     (octave . t)
+     (sqlite . t)
+     (perl . t)
+     (screen . t)
+     (plantuml . t)
+     (lilypond . t)
+     (org . t)
+     (makefile . t)
+     ))
+  (setq org-src-preserve-indentation t)
+
+  (setq rrmooc/new-org-templates (version<= "9.2" (org-version)))
+  (when  rrmooc/new-org-templates
+    (require 'org-tempo))
+
+  (require 'subr-x)
+  (defun rrmooc/add-org-template (old-style-template)
+    (add-to-list 'org-structure-template-alist
+                 (if rrmooc/new-org-templates
+                     (cons
+                      (first old-style-template)
+                      (string-trim-right (substring (second old-style-template) 8 -9)))
+                   old-style-template)))
+
+  (unless rrmooc/new-org-templates
+    ;; this template is predefined in the new templating system
+    (rrmooc/add-org-template
+     '("s" "#+begin_src ?\n\n#+end_src" "<src lang=\"?\">\n\n</src>")))
+
+  (rrmooc/add-org-template
+   '("m" "#+begin_src emacs-lisp\n\n#+end_src" "<src lang=\"emacs-lisp\">\n\n</src>"))
+
+  (rrmooc/add-org-template
+   '("r" "#+begin_src R :results output :session *R* :exports both\n\n#+end_src" "<src lang=\"R\">\n\n</src>"))
+
+  (rrmooc/add-org-template
+   '("R" "#+begin_src R :results output graphics :file (org-babel-temp-file \"figure\" \".png\") :exports both :width 600 :height 400 :session *R* \n\n#+end_src" "<src lang=\"R\">\n\n</src>"))
+
+  (rrmooc/add-org-template
+   '("RR" "#+begin_src R :results output graphics :file  (org-babel-temp-file (concat (file-name-directory (or load-file-name buffer-file-name)) \"figure-\") \".png\") :exports both :width 600 :height 400 :session *R* \n\n#+end_src" "<src lang=\"R\">\n\n</src>"))
+
+  (rrmooc/add-org-template
+   '("p" "#+begin_src python :results output :exports both\n\n#+end_src" "<src lang=\"python\">\n\n</src>"))
+
+  (rrmooc/add-org-template
+   '("P" "#+begin_src python :results output :session :exports both\n\n#+end_src" "<src lang=\"python\">\n\n</src>"))
+
+  (rrmooc/add-org-template
+   '("PP" "#+begin_src python :results file :session :var matplot_lib_filename=(org-babel-temp-file \"figure\" \".png\") :exports both\nimport matplotlib.pyplot as plt\n\nimport numpy\nx=numpy.linspace(-15,15)\nplt.figure(figsize=(10,5))\nplt.plot(x,numpy.cos(x)/x)\nplt.tight_layout()\n\nplt.savefig(matplot_lib_filename)\nmatplot_lib_filename\n#+end_src" "<src lang=\"python\">\n\n</src>"))
+
+  (rrmooc/add-org-template
+   '("b" "#+begin_src shell :results output :exports both\n\n#+end_src" "<src lang=\"sh\">\n\n</src>"))
+
+  (rrmooc/add-org-template
+   '("B" "#+begin_src shell :session *shell* :results output :exports both \n\n#+end_src" "<src lang=\"sh\">\n\n</src>"))
+
+  (rrmooc/add-org-template
+   '("g" "#+begin_src dot :results output graphics :file \"/tmp/graph.pdf\" :exports both
+digraph G {
+node [color=black,fillcolor=white,shape=rectangle,style=filled,fontname=\"Helvetica\"];
+A[label=\"A\"]
+B[label=\"B\"]
+A->B
+}\n#+end_src" "<src lang=\"dot\">\n\n</src>"))
+
+  (global-set-key (kbd "C-c S-t") 'org-babel-execute-subtree)
+
+  (add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
+  (add-hook 'org-mode-hook 'org-display-inline-images)
+  (add-hook 'org-mode-hook 'org-babel-result-hide-all)
+
+  (setq python-shell-completion-native-enable nil)
+
+
   ;; STARTUP
   (setq powerline-default-separator nil) ;; remove weird separators
   (spacemacs/toggle-vi-tilde-fringe-off) ;; remove ~
   (xterm-mouse-mode -1) ;; allow mouse selection
-  (setq-default indent-tabs-mode t) ;; by default, indent with tabs
-  (setq tab-width 4) ;; better
-  (cua-mode t) ;; some Common User Access keys (not really though)
+  ;; (setq-default indent-tabs-mode t) ;; by default, indent with tabs
+  ;; (setq tab-width 4) ;; better
   ;; (global-set-key (kbd "C-S-z") 'evil-lisp-state-undo-tree-redo)
   ;; (global-set-key (kbd "C-y") 'evil-lisp-state-undo-tree-redo)
   ;; (global-set-key (kbd "C-s") 'evil-write) ;; save current file
@@ -445,8 +645,6 @@ you should place your code here."
   (global-set-key (kbd "<f12>") (kbd ", g g")) ;; jump to definition
   (global-set-key (kbd "C-<f12>") (kbd "<f9> <f12>")) ;; open definition to the right
   (global-set-key (kbd "C-`") (kbd "<f9> :term RET RET")) ;; open terminal in new window
-  (neotree-show) (neotree-toggle) ;; start file explorer and hide it
-  ;; (global-set-key (kbd "C-S-e") 'neotree-toggle)
   (global-set-key (kbd "C-<f2>") 'srefactor-refactor-at-point) ;; smart refactor
   ;; multi-cursor keybindings
   (global-unset-key (kbd "M-<down-mouse-1>"))
@@ -458,9 +656,9 @@ you should place your code here."
     '(define-key markdown-mode-map (kbd "C-S-v") 'markdown-live-preview-mode))
   (blink-cursor-mode 1)
   (fira-code-mode) ;; enable code ligatures
-  (spacemacs/toggle-mode-line-battery-on)
+  ;; (spacemacs/toggle-mode-line-battery-on)
   (spacemacs/toggle-display-time-on)
-  )
+)
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
