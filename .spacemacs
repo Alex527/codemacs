@@ -36,25 +36,25 @@ values."
      ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
      ;; <M-m f e R> (Emacs style) to install them.
      ;; ----------------------------------------------------------------
-     org
-     pandoc
-     latex
      emacs-lisp
+     better-defaults
      helm
      auto-completion
      semantic
      syntax-checking
-     better-defaults
-     markdown
+     org
+     pandoc
+     latex
      html
+     markdown
      git
      version-control
-     c-c++
-     python
-     java
+     ;; c-c++
+     ;; python
+     ;; java
      ;; plantuml
-     octave
-     scheme
+     ;; octave
+     ;; scheme
      ;; asm
      )
    ;; List of additional packages that will be installed without being
@@ -238,7 +238,7 @@ values."
    dotspacemacs-loading-progress-bar t
    ;; If non nil the frame is fullscreen when Emacs starts up. (default nil)
    ;; (Emacs 24.4+ only)
-   dotspacemacs-fullscreen-at-startup nil
+   dotspacemacs-fullscreen-at-startup t
    ;; If non nil `spacemacs/toggle-fullscreen' will not use native fullscreen.
    ;; Use to disable fullscreen animations in OSX. (default nil)
    dotspacemacs-fullscreen-use-non-native nil
@@ -444,12 +444,6 @@ you should place your code here."
   (set-keyboard-coding-system 'utf-8)
   (prefer-coding-system 'utf-8)
 
-  (setq
-   ns-command-modifier 'meta         ; Apple/Command key is Meta
-   ns-alternate-modifier nil         ; Option is the Mac Option key
-   ns-use-mac-modifier-symbols  nil  ; display standard Emacs (and not standard Mac) modifier symbols
-   )
-
   (cua-mode t) ;; some Common User Access keys (not really though)
 
   (global-set-key [f5] '(lambda () (interactive) (revert-buffer nil t nil)))
@@ -532,7 +526,7 @@ Entered on %U
    '(
      (shell . t)
      (python . t)
-     (R . t)
+     ;; (R . t)
      (ruby . t)
      (ocaml . t)
      (ditaa . t)
@@ -615,8 +609,8 @@ A->B
   (setq powerline-default-separator nil) ;; remove weird separators
   (spacemacs/toggle-vi-tilde-fringe-off) ;; remove ~
   (xterm-mouse-mode -1) ;; allow mouse selection
-  ;; (setq-default indent-tabs-mode t) ;; by default, indent with tabs
-  ;; (setq tab-width 4) ;; better
+  (setq-default indent-tabs-mode t) ;; by default, indent with tabs
+  (setq tab-width 4) ;; better
   ;; (global-set-key (kbd "C-S-z") 'evil-lisp-state-undo-tree-redo)
   ;; (global-set-key (kbd "C-y") 'evil-lisp-state-undo-tree-redo)
   ;; (global-set-key (kbd "C-s") 'evil-write) ;; save current file
