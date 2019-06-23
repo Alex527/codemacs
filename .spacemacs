@@ -539,6 +539,7 @@ Entered on %U
      (lilypond . t)
      (org . t)
      (makefile . t)
+     (C . t)
      ))
   (setq org-src-preserve-indentation t)
 
@@ -624,10 +625,12 @@ A->B
   ;; (global-set-key (kbd "C-/") 'evilnc-comment-or-uncomment-lines)
   (drag-stuff-global-mode 1) ;; enable moving lines, regions and words
   (drag-stuff-define-keys) ;; ... using normal keybindings
-  (auto-fill-mode nil)
   (set-fill-column 80)
   (fci-mode 1) ;; show margin indicator
-  (spacemacs/toggle-highlight-long-lines-globally-on)
+  ;; (spacemacs/toggle-highlight-long-lines-globally-on)
+  (spacemacs/toggle-auto-fill-mode-off)
+  (spacemacs/toggle-truncate-lines-off)
+  (spacemacs/toggle-visual-line-navigation-on)
   (global-set-key (kbd "C-g") 'goto-line)
   (global-set-key (kbd "<C-tab>") 'evil-window-next)
   (global-set-key (kbd "<C-iso-lefttab>") 'evil-window-prev)
